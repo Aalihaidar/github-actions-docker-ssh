@@ -1,0 +1,40 @@
+# This is a basic workflow to demonstrate running a Docker container on a remote server via SSH
+
+name: Remote Docker Deployment
+
+# Controls when the action will run. 
+# In this case, it runs on pushes to the 'main' branch.
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
+jobs:
+  # This workflow contains a single job called "deploy"
+  deploy:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Step 1: Check out your repository code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Load the SSH Private Key from GitHub Secrets
+    # This action configures the ssh-agent with your private key, allowing secure SSH connections.
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.5.4
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    # Step 3: Run Docker command on the remote server
+    # This step uses SSH to connect to your remote server and run the docker command.
+    - name: Run hello-world on remote server
+      run: |
+        echo "Connecting to ${{ secrets.SSH_HOST }}..."
+        # Add the remote server's fingerprint to known_hosts to avoid interactive prompts
+        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+        
+        # Execute the docker pull and run commands on the remote server
+        ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'docker pull hello-world && docker run hello-world'
