@@ -34,7 +34,12 @@ jobs:
       run: |
         echo "Connecting to ${{ secrets.SSH_HOST }}..."
         
-        # Execute the docker command on the remote server.
-        # -o StrictHostKeyChecking=no : Disables the prompt for adding the host key.
-        # -tt : Forces TTY allocation, which is required by the PWD proxy.
-        ssh -o StrictHostKeyChecking=no -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'docker pull hello-world && docker run hello-world'
+        # Use a "here document" (<< EOF) to stream commands to the remote host.
+        # This is the most robust method for automating commands against servers
+        # that expect an interactive session.
+        ssh -o StrictHostKeyChecking=no -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          # These commands are now executed on the remote server
+          docker pull hello-world
+          docker run hello-world
+          exit
+        EOF
