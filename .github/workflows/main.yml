@@ -36,5 +36,5 @@ jobs:
         
         # Execute the docker command on the remote server.
         # -o StrictHostKeyChecking=no : Disables the prompt for adding the host key.
-        # -v : Enables verbose mode for detailed debug output.
-        ssh -o StrictHostKeyChecking=no -v ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'docker pull hello-world && docker run hello-world'
+        # -tt : Forces TTY allocation, which is required by the PWD proxy.
+        ssh -o StrictHostKeyChecking=no -tt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} 'docker pull hello-world && docker run hello-world'
